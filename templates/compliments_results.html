@@ -1,13 +1,11 @@
-{% extends 'base.html' %}
-
-{% block title %}
-Compliments Results
-{% endblock %}
-
+{% extends 'base.html' %} {% block title %} Compliments Results {% endblock %}
 {% block content %}
-
-<!-- Your HTML code goes here! -->
-
-
-
-{% endblock %}
+<p>Hi {{name}}!</p>
+{% if comp %}
+<p>You are:</p>
+<ul>
+  {% for n in range(num) %}
+  <li>{{complis[n]}}</li>
+  {% endfor %}
+</ul>
+{% endif %} {% endblock %}
