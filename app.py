@@ -75,7 +75,8 @@ animal_to_fact = {
     'parrot': 'Parrots will selflessly help each other out.',
     'mantis shrimp': 'The mantis shrimp has the world\'s fastest punch.',
     'lion': 'Female lions do 90 percent of the hunting.',
-    'narwhal': 'Narwhal tusks are really an "inside out" tooth.'
+    'narwhal': 'Narwhal tusks are really an "inside out" tooth.',
+    'panda': 'Pandas are very cool.'
 }
 
 
@@ -83,13 +84,16 @@ animal_to_fact = {
 def animal_facts():
     """Show a form to choose an animal and receive facts."""
 
-    # TODO: Collect the form data and save as variables
+    name = request.args.get("animal")
+    animals = animal_to_fact.keys()
+    if name is not None:
+        fact = animal_to_fact[name]
+    else:
+        fact = None
 
     context = {
-        # TODO: Enter your context variables here for:
-        # - the list of all animals (get from animal_to_fact)
-        # - the chosen animal fact
-        # - (may be None if the user hasn't filled out the form yet)
+        "animals": animals,
+        "fact": fact
     }
     return render_template('animal_facts.html', **context)
 
@@ -117,7 +121,7 @@ def save_image(image, filter_type):
     image.filename = new_file_name
 
     # Construct full file path
-    file_path = os.path.join(app.root_path, 'static/images', file_name)
+    file_path = os.path.join(app.root_path, 'static/images', new_file_name)
 
     # Save the image
     image.save(file_path)
@@ -140,33 +144,27 @@ def image_filter():
 
     if request.method == 'POST':
 
-        # TODO: Get the user's chosen filter type
-        # (whichever one they chose in the form) and save
-        # as a variable
-        filter_type = ''
+        filter_type = request.form.get("filter_type")
 
         # Get the image file submitted by the user
         image = request.files.get('users_image')
 
-        # TODO: call `save_image()` on the image &
-        # the user's chosen filter type, save the returned
-        # value as the new file path
+        file_path = save_image(image, filter_type)
 
-        # TODO: Call `apply_filter()` on the file path & filter type
+        apply_filter(file_path, filter_type)
 
-        image_url = f'/static/images/{filter_type}-{image.filename}'
+        image_url = f'/static/images/{image.filename}'
 
         context = {
-            # TODO: Add context variables here for:
-            # - The full list of filter types
-            # - The image URL
+            "filter_types": filter_types_dict.keys(),
+            "image_url": image_url
         }
 
         return render_template('image_filter.html', **context)
 
     else:  # if it's a GET request
         context = {
-            # TODO: Add context variable here for the full list of filter types
+            "filter_types": filter_types_dict.keys()
         }
         return render_template('image_filter.html', **context)
 
@@ -186,17 +184,15 @@ def gif_search():
     Show a form to search for GIFs and show resulting GIFs from Tenor API.
     """
     if request.method == 'POST':
-        # TODO: Get the search query & number of GIFs requested by the user,
-        # store each as a
-        # variable
+        search_query = request.form.get("search_query")
+        quantity = request.form.get("quantity")
 
         response = requests.get(
             TENOR_URL,
             {
-                # TODO: Add in key-value pairs for:
-                # - 'q': the search query
-                # - 'key': the API key (defined above)
-                # - 'limit': the number of GIFs requested
+                "q": search_query,
+                "key": API_KEY,
+                "limit": quantity
             })
 
         gifs = json.loads(response.content).get('results')
@@ -206,7 +202,7 @@ def gif_search():
         }
 
         # Uncomment me to see the result JSON!
-        # pp.pprint(gifs)
+        pp.pprint(gifs)
 
         return render_template('gif_search.html', **context)
     else:
